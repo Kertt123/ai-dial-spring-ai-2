@@ -8,3 +8,10 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+
+# Maven build directory
+target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
