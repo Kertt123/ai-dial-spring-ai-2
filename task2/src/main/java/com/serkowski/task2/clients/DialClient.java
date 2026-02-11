@@ -19,12 +19,19 @@ public class DialClient {
     }
 
 
-    public Mono<String> getCompletions(List<Message> messages, String deploymentName, int numberOfResponses) {
+    public Mono<String> getCompletions(List<Message> messages, String deploymentName, int numberOfResponses, double temperature, long seed, int maxTokens, double frequencyPenalty, double presencePenalty,
+                                       List<String> stop) {
         return chatClient.prompt()
                 .messages(messages)
                 .options(AzureOpenAiChatOptions.builder()
                         .deploymentName(deploymentName)
                         .N(numberOfResponses)
+                        .temperature(temperature)
+                        .seed(seed)
+                        .maxTokens(maxTokens)
+                        .frequencyPenalty(frequencyPenalty)
+                        .presencePenalty(presencePenalty)
+                        .stop(stop)
                         .build())
                 .stream()
                 .content()
