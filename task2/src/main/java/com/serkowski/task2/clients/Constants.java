@@ -1,4 +1,4 @@
-package com.serkowski.clients;
+package com.serkowski.task2.clients;
 
 public class Constants {
     public final static String DEFAULT_SYSTEM_PROMPT = "You are an assistant who answers concisely and informatively.";

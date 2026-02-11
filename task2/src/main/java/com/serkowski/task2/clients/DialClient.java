@@ -1,4 +1,4 @@
-package com.serkowski.clients;
+package com.serkowski.task2.clients;
 
 import org.springframework.ai.azure.openai.AzureOpenAiChatOptions;
 import org.springframework.ai.chat.client.ChatClient;
@@ -19,14 +19,16 @@ public class DialClient {
     }
 
 
-    public String getCompletions(List<Message> messages, String deploymentName) {
-        return chatClient.prompt()
+    public AssistantMessage getCompletions(List<Message> messages, String deploymentName, int numberOfResponses) {
+        String fullText = chatClient.prompt()
                 .messages(messages)
                 .options(AzureOpenAiChatOptions.builder()
                         .deploymentName(deploymentName)
+                        .N(numberOfResponses)
                         .build())
                 .call()
                 .content();
+        return AssistantMessage.builder().content(fullText).build();
     }
 
     public AssistantMessage getCompletionsStream(List<Message> messages, String deploymentName) {
