@@ -24,7 +24,7 @@ public class DialBucketClient {
         this.apiKey = apiKey;
     }
 
-    public Mono<DialAttachement> putImageIntoDIALBucket(byte[] attachement, String fileName, String type) {
+    public Mono<DialAttachement> putImageIntoDIALBucket(byte[] attachment, String fileName, String type) {
         return webClient.get()
                 .uri(endpoint + "/v1/bucket")
                 .header("api-key", apiKey)
@@ -33,7 +33,7 @@ public class DialBucketClient {
                 .bodyToMono(BucketResponse.class)
                 .flatMap(bucketResponse -> {
                     MultipartBodyBuilder builder = new MultipartBodyBuilder();
-                    builder.part("file", new ByteArrayResource(attachement))
+                    builder.part("file", new ByteArrayResource(attachment))
                             .filename(fileName);
                     return webClient.put()
                             .uri(endpoint + "/v1/files/" + bucketResponse.bucket() + "/" + fileName)
@@ -44,5 +44,13 @@ public class DialBucketClient {
                             .bodyToMono(BucketUploadResponse.class)
                             .map(bucketUploadResponse -> new DialAttachement(fileName, bucketUploadResponse.url(), type));
                 });
+    }
+
+    public Mono<byte[]> getAttachmentFromBucket(String url) {
+        return webClient.get()
+                .uri(endpoint + "/v1/" + url)
+                .header("api-key", apiKey)
+                .retrieve()
+                .bodyToMono(byte[].class);
     }
 }

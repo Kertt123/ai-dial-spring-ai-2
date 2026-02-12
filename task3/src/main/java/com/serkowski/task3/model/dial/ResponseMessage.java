@@ -1,4 +1,6 @@
 package com.serkowski.task3.model.dial;
 
-public record ResponseMessage(String content) {
+import com.serkowski.task3.model.bucket.CustomContent;
+
+public record ResponseMessage(String content, CustomContent custom_content) {
 }

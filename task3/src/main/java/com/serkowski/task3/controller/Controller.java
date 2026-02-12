@@ -2,9 +2,12 @@ package com.serkowski.task3.controller;
 
 import com.serkowski.task3.clients.DialClient;
 import com.serkowski.task3.clients.DialCustomClient;
+import com.serkowski.task3.model.GenerateImageRequest;
 import com.serkowski.task3.model.TextWithImgPathRequest;
 import com.serkowski.task3.model.TextWithImgUrlRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +36,14 @@ public class Controller {
     @PostMapping("/textWithImagePathDial")
     Mono<String> textWithImagePathDial(@RequestBody Mono<TextWithImgPathRequest> requestBody) {
         return requestBody.flatMap(request -> dialCustomClient.getCompletionsWithImagePathDIAL(request.message(), request.imageType(), request.imagePath()));
+    }
+
+    @PostMapping(value = "/generateImage", produces = MediaType.IMAGE_PNG_VALUE)
+    Mono<ResponseEntity<byte[]>> generateImage(@RequestBody GenerateImageRequest request) {
+        return dialCustomClient.generateImage(request.content(), request.size(), request.style(), request.quality())
+                .map(imageBytes -> ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_PNG)
+                        .body(imageBytes));
     }
 
 

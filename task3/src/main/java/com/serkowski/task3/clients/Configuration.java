@@ -8,6 +8,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @org.springframework.context.annotation.Configuration
@@ -32,7 +33,14 @@ public class Configuration {
 
     @Bean
     public WebClient webClient() {
-        return WebClient.create();
+        int bufferSize = 16 * 1024 * 1024;
+        return WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer
+                                .defaultCodecs()
+                                .maxInMemorySize(bufferSize))
+                        .build())
+                .build();
     }
 
     @Bean

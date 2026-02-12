@@ -2,6 +2,8 @@ package com.serkowski.task3.clients;
 
 import com.serkowski.task3.model.bucket.CustomContent;
 import com.serkowski.task3.model.bucket.DialAttachement;
+import com.serkowski.task3.model.dial.Configuration;
+import com.serkowski.task3.model.dial.CustomField;
 import com.serkowski.task3.model.dial.Request;
 import com.serkowski.task3.model.dial.RequestMessage;
 import com.serkowski.task3.model.dial.Response;
@@ -13,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class DialCustomClient {
@@ -50,7 +53,7 @@ public class DialCustomClient {
                 .uri(url + "/openai/deployments/gpt-4o/chat/completions")
                 .header("api-key", apiKey)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(new Request(List.of(new RequestMessage("user", message, new CustomContent(List.of(dialAttachement)))), true))
+                .bodyValue(new Request(List.of(new RequestMessage("user", message, new CustomContent(List.of(dialAttachement)), null)), true))
                 .retrieve()
                 .bodyToFlux(Response.class)
                 .takeWhile(response -> {
@@ -69,5 +72,29 @@ public class DialCustomClient {
                 .filter(content -> !content.isEmpty())
                 .collectList()
                 .map(contents -> String.join("", contents));
+    }
+
+    public Mono<byte[]> generateImage(String prompt, String size, String style, String quality) {
+        return webClient
+                .post()
+                .uri(url + "/openai/deployments/dall-e-3/chat/completions")
+                .header("api-key", apiKey)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(new Request(List.of(new RequestMessage("user", prompt, null, new CustomField(new Configuration(size, style, quality)))), false))
+                .retrieve()
+                .bodyToMono(Response.class)
+                .flatMap(response -> {
+                    try {
+                        String imageUrl = response.choices().stream().findFirst().get().message().custom_content().attachments()
+                                .stream()
+                                .map(DialAttachement::url)
+                                .filter(Objects::nonNull)
+                                .findFirst()
+                                .get();
+                        return dialBucketClient.getAttachmentFromBucket(imageUrl);
+                    } catch (Exception e) {
+                        return Mono.just(new byte[0]);
+                    }
+                });
     }
 }

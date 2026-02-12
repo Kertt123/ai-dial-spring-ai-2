@@ -18,7 +18,6 @@ public class DialClient {
         this.chatClient = chatClient;
     }
 
-
     public Mono<String> getCompletionsWithImageUrl(String message, String imgType, String imageUrl) {
         return Mono.defer(() -> {
             try {
