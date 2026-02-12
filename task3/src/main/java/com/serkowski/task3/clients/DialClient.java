@@ -52,26 +52,4 @@ public class DialClient {
             }
         });
     }
-
-    public Mono<String> getCompletionsWithImagePathDIAL(String message, String imgType, String imgPath) {
-        return Mono.defer(() -> {
-            try {
-                ClassPathResource resource = new ClassPathResource(imgPath);
-                putImageIntoDIALBucket(resource);
-                return chatClient.prompt()
-                        .user(userSpec -> userSpec
-                                .text(message)
-                                .media(MimeType.valueOf(imgType), resource))
-                        .stream()
-                        .content()
-                        .collect(Collectors.joining());
-            } catch (Exception e) {
-                return Mono.error(new IllegalArgumentException("Not correct image path " + imgPath, e));
-            }
-        });
-    }
-
-    private void putImageIntoDIALBucket(ClassPathResource resource) {
-
-    }
 }
