@@ -1,4 +1,4 @@
-package com.serkowski.task3.model;
+package com.serkowski.task2.model;
 
 import java.io.Serializable;
 import java.util.List;

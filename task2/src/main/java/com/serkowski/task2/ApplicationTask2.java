@@ -1,4 +1,4 @@
-package com.serkowski.task3;
+package com.serkowski.task2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

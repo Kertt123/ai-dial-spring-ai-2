@@ -1,14 +1,14 @@
-package com.serkowski.task3.controller;
+package com.serkowski.task2.controller;
 
-import com.serkowski.task3.clients.DialClient;
-import com.serkowski.task3.model.Task1Request;
-import com.serkowski.task3.model.Task2Request;
-import com.serkowski.task3.model.Task3Request;
-import com.serkowski.task3.model.Task4Request;
-import com.serkowski.task3.model.Task5Request;
-import com.serkowski.task3.model.Task6Request;
-import com.serkowski.task3.model.Task7Request;
-import com.serkowski.task3.model.Task8Request;
+import com.serkowski.task2.clients.DialClient;
+import com.serkowski.task2.model.Task1Request;
+import com.serkowski.task2.model.Task2Request;
+import com.serkowski.task2.model.Task3Request;
+import com.serkowski.task2.model.Task4Request;
+import com.serkowski.task2.model.Task5Request;
+import com.serkowski.task2.model.Task6Request;
+import com.serkowski.task2.model.Task7Request;
+import com.serkowski.task2.model.Task8Request;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

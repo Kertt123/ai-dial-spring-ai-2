@@ -1,4 +1,4 @@
-package com.serkowski.task3.clients;
+package com.serkowski.task2.clients;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
