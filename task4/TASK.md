@@ -1,19 +1,12 @@
-# Image Generation and Analysis with DIAL API
+# RAG (Retrieval-Augmented Generation) Implementation
 
-A Python implementation task to work with AI image generation and analysis capabilities via DIAL API
+A Python implementation task to build a complete RAG system for microwave manual assistance using LangChain, FAISS, and Azure OpenAI
 
 ## 🎓 Learning Goals
 
-By completing these tasks, you will learn:
-- How to generate images from text prompts using DALL-E 3
-- How to analyze images using different AI models (GPT-4o, Claude-3-Sonnet)
-- Two different approaches for handling images in AI systems:
-   - **OpenAI approach**: Base64 encoding for direct embedding
-   - **DIAL approach**: Bucket storage with attachment references
-- How to work with file uploads, downloads with DIAL bucket
-- How DIAL adapts requests for different AI model vendors
-
----
+By completing this task, you will learn:
+- How to implement the complete RAG pipeline: **Retrieval**, **Augmentation**, and **Generation**
+- How to work with vector embeddings and similarity search using FAISS
 
 ## 📋 Requirements
 
@@ -29,99 +22,124 @@ By completing these tasks, you will learn:
    ```
 
 2. **Set your API key:**
-   - Ensure that you are connected to the EPAM VPN
-   - Get the DIAL API key here: https://support.epam.com/ess?id=sc_cat_item&table=sc_cat_item&sys_id=910603f1c3789e907509583bb001310c
-   - Update the `API_KEY` constant in `task/_utils/constants.py`
-   - Get available models from: https://ai-proxy.lab.epam.com/openai/models
+    - Ensure that you connected to the EPAM VPN
+    - Get the DIAL API key here: https://support.epam.com/ess?id=sc_cat_item&table=sc_cat_item&sys_id=910603f1c3789e907509583bb001310c
+    - Update `task/_constants.py` with your API credentials
+    - Get available models from: https://ai-proxy.lab.epam.com/openai/models
 
 3. **Project structure:**
    ```
    task/
-   ├── _models/
-   │   ├── conversation.py          # ✅ Complete
-   │   ├── message.py               # ✅ Complete  
-   │   ├── role.py                  # ✅ Complete
-   │   └── custom_content.py        # ✅ Complete
-   ├── _utils/
-   │   ├── model_client.py          # ✅ Complete
-   │   ├── bucket_client.py         # ✅ Complete
-   │   ├── constants.py             # ✅ Complete
-   │   └── request.py               # ✅ Complete
-   ├── image_to_text/
-   │   ├── openai/
-   │   │   ├── message.py           # ✅ Complete
-   │   │   └── task_openai_itt.py   # 🚧 TODO
-   │   └── task_dial_itt.py         # 🚧 TODO
-   └── text_to_image/
-       └── task_tti.py              # 🚧 TODO
-   dialx-banner.png                 # 📁 Sample image
+   ├── _constants.py                # ✅ API configuration
+   ├── microwave_manual.txt         # ✅ Knowledge base document
+   └── app.py                       # 🚧 TODO - Your main implementation
    ```
+## 🖌️ Application diagram:
 
----
+<img src="application-diagram.png">
 
-## 📝 Your Tasks
+## 📝 Your Task
 
-### If the task in the main branch is hard for you, then switch to the `with-detailed-description` branch
+### If the task in the main branch is hard for you, then switch to the with-detailed-description branch
 
-Complete the implementation of these three practice files:
+Complete the implementation in `app.py` by filling in all the TODO sections:
 
-### 1. **task_openai_itt.py** - OpenAI-Style Image Analysis
-**Goal:** Analyze an image using base64 encoding approach
-- Create DialModelClient with GPT-4o model (and other models)
-- Encode image as base64 data URL
-- Send ContentedMessage with text and image content
-- **Key Learning:** Direct image embedding in messages
+### 🔍 **Step 1: Vector Store Setup (`_setup_vectorstore` method)**
+- Check if FAISS index already exists locally
+- Load existing index or create new one
+- Handle both scenarios properly
 
-### 2. **task_dial_itt.py** - DIAL-Style Image Analysis
-**Goal:** Analyze an image using bucket storage approach
-- Upload image to DIAL bucket storage
-- Create message with attachment reference
-- Test with different AI models
-- **Key Learning:** File storage and attachment handling
+### 📖 **Step 2: Document Processing (`_create_new_index` method)**
+- Load the microwave manual text file
+- Split documents into chunks using RecursiveCharacterTextSplitter
+- Create FAISS vector store from document chunks
+- Save the index locally for future use
 
-### 3. **task_tti.py** - Text-to-Image Generation
-**Goal:** Generate images from text prompts
-- Create text prompt for image generation
-- Use DALL-E 3 model for generation
-- Download and save generated images
-- Experiment with `size`, `quality` and `style` of output via `custom_fields` configuration parameter
-- **Key Learning:** AI image generation and file handling
+### 🔎 **Step 3: Context Retrieval (`retrieve_context` method)**
+- Implement similarity search with relevance scores
+- Extract and format relevant document chunks
+- Return formatted context for the LLM
+
+### 🔗 **Step 4: Prompt Augmentation (`augment_prompt` method)**
+- Format the user prompt with retrieved context
+- Structure the prompt according to the RAG template
+
+### 🤖 **Step 5: Answer Generation (`generate_answer` method)**
+- Create proper message structure for the LLM
+- Call Azure OpenAI to generate the final answer
+- Return the generated response
+
+### ⚙️ **Step 6: Main Configuration**
+- Set up Azure OpenAI embeddings client
+- Configure the chat completion client
+- Initialize the RAG system with proper parameters
 
 
-## 🎯 Expected Outputs
+## 📊 Understanding the RAG Pipeline
 
-### Text-to-Image Task
-- Generated image file saved locally with timestamp
-- Console output showing request/response details
+Your implementation will demonstrate the complete RAG workflow:
 
-### Image-to-Text Tasks
-- AI description of the `dialx-banner.png` image
-- Comparison between different models' responses
+1. **🔍 Retrieval**: Find relevant chunks from the microwave manual based on user query
+2. **🔗 Augmentation**: Combine retrieved context with user question in a structured prompt
+3. **🤖 Generation**: Use LLM to generate accurate answer based on the provided context
 
-## 🛠️ Troubleshooting
+## 🔧 Configuration Parameters
 
-**Common Issues:**
-- **Empty API key:** Update `constants.py` with your DIAL API key
-- **VPN connection:** Ensure EPAM VPN is active
-- **File not found:** Verify `dialx-banner.png` exists in project root
-- **Network errors:** Check DIAL service status and connectivity
-
-## 🌟 Bonus Challenges
-
-Once you complete the basic tasks, try these extensions:
-1. **Multi-model comparison:** Run the same image analysis with different models
-2. **Custom prompts:** Create your own text-to-image prompts
-3. **Batch processing:** Analyze multiple images at once
-4. **Error handling:** Add robust error handling and retries
+You can experiment with these parameters in the `retrieve_context` method:
+- `k`: Number of relevant chunks to retrieve (default: 4)
+- `score`: Similarity threshold for chunk relevance (default: 0.3)
+- `chunk_size`: Size of document chunks (default: 300)
+- `chunk_overlap`: Overlap between chunks (default: 50)
 
 ## 📚 Key Concepts Covered
 
-- **Multimodal AI:** Working with both text and images
-- **API Design Patterns:** Different approaches to handle media content
-- **Async Programming:** File operations and HTTP requests
-- **Model Abstraction:** How DIAL Core adapts requests across vendors
-- **File Management:** Upload, download, and storage operations
+- **Vector Embeddings**: Converting text to numerical vectors for similarity search
+- **FAISS**: Efficient similarity search and clustering of dense vectors
+- **Document Chunking**: Breaking large documents into manageable pieces
+- **Similarity Search**: Finding most relevant content based on query
 
----
+## 🎯 Testing Your Implementation
+
+### Valid request samples:
+``` 
+What safety precautions should be taken to avoid exposure to excessive microwave energy?
+```
+```
+What is the maximum cooking time that can be set on the DW 395 HCG microwave oven?
+```
+```
+How should you clean the glass tray of the microwave oven?
+```
+```
+What materials are safe to use in this microwave during both microwave and grill cooking modes?
+```
+```
+What are the steps to set the clock time on the DW 395 HCG microwave oven?
+```
+```
+What is the ECO function on this microwave and how do you activate it?
+```
+```
+What are the specifications for proper installation, including the required free space around the oven?
+```
+```
+How does the multi-stage cooking feature work, and what types of cooking programs cannot be included in it?
+```
+```
+What should you do if food in plastic or paper containers starts smoking during heating?
+```
+```
+What is the recommended procedure for removing odors from the microwave oven?
+```
+
+### Invalid request samples:
+```
+What do you know about the DIALX community?
+```
+```
+What do you think about the dinosaur era? Why did they die?
+```
+
+----
 
 # <img src="dialx-banner.png">
