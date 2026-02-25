@@ -16,13 +16,12 @@ public class DialClient {
         this.chatClient = chatClient;
     }
 
-    public Mono<String> chat(String message, String conversationId) {
+    public String chat(String message, String conversationId) {
         return chatClient.prompt()
                 .user(message)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
-                .stream()
-                .content()
-                .collect(Collectors.joining());
+                .call()
+                .content();
     }
 
 }

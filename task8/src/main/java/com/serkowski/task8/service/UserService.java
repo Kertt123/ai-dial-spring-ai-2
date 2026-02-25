@@ -2,73 +2,68 @@ package com.serkowski.task8.service;
 
 import com.serkowski.task8.model.SearchRequest;
 import com.serkowski.task8.model.User;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Optional;
+import java.util.List;
 
 public class UserService {
 
     private static final String USER_SERVICE_ENDPOINT = "http://localhost:8041";
 
-    private final WebClient webClient;
+    private final RestTemplate restTemplate;
 
-    public UserService(WebClient webClient) {
-        this.webClient = webClient;
+    public UserService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
-    public Flux<User> getAllUsers() {
-        return webClient.get()
-                .uri(USER_SERVICE_ENDPOINT + "/v1/users")
-                .retrieve()
-                .bodyToFlux(User.class);
+    public List<User> getAllUsers() {
+        return restTemplate.exchange(
+                USER_SERVICE_ENDPOINT + "/v1/users",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<User>>() {}
+        ).getBody();
     }
 
-    public Mono<User> getUserById(String id) {
-        return webClient.get()
-                .uri(USER_SERVICE_ENDPOINT + "/v1/users/{id}", id)
-                .retrieve()
-                .bodyToMono(User.class);
+    public User getUserById(String id) {
+        return restTemplate.getForObject(USER_SERVICE_ENDPOINT + "/v1/users/{id}", User.class, id);
     }
 
-    public Flux<User> searchUsers(SearchRequest searchRequest) {
-        return webClient.get()
-                .uri(uriBuilder -> {
-                    uriBuilder.scheme("http");
-                    uriBuilder.host("localhost");
-                    uriBuilder.port(8041);
-                    uriBuilder.path("/v1/users/search");
-                    uriBuilder.queryParamIfPresent("name", Optional.ofNullable(searchRequest.name()));
-                    uriBuilder.queryParamIfPresent("surname", Optional.ofNullable(searchRequest.surname()));
-                    uriBuilder.queryParamIfPresent("email", Optional.ofNullable(searchRequest.email()));
-                    uriBuilder.queryParamIfPresent("gender", Optional.ofNullable(searchRequest.gender()));
-                    return uriBuilder.build();
-                })
-                .retrieve()
-                .bodyToFlux(User.class);
+    public List<User> searchUsers(SearchRequest searchRequest) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(USER_SERVICE_ENDPOINT + "/v1/users/search");
+
+        if (searchRequest.name() != null) builder.queryParam("name", searchRequest.name());
+        if (searchRequest.surname() != null) builder.queryParam("surname", searchRequest.surname());
+        if (searchRequest.email() != null) builder.queryParam("email", searchRequest.email());
+        if (searchRequest.gender() != null) builder.queryParam("gender", searchRequest.gender());
+
+        return restTemplate.exchange(
+                builder.toUriString(),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<User>>() {}
+        ).getBody();
     }
 
-    public Mono<User> createUser(User user) {
-        return webClient.post()
-                .uri(USER_SERVICE_ENDPOINT + "/v1/users")
-                .bodyValue(user)
-                .retrieve()
-                .bodyToMono(User.class);
+    public User createUser(User user) {
+        return restTemplate.postForObject(USER_SERVICE_ENDPOINT + "/v1/users", user, User.class);
     }
 
-    public Mono<User> updateUser(int id, User user) {
-        return webClient.put()
-                .uri(USER_SERVICE_ENDPOINT + "/v1/users/{id}", id)
-                .bodyValue(user)
-                .retrieve()
-                .bodyToMono(User.class);
+    public User updateUser(int id, User user) {
+        return restTemplate.exchange(
+                USER_SERVICE_ENDPOINT + "/v1/users/{id}",
+                HttpMethod.PUT,
+                new HttpEntity<>(user),
+                User.class,
+                id
+        ).getBody();
     }
 
-    public Mono<Void> deleteUser(int id) {
-        return webClient.delete()
-                .uri(USER_SERVICE_ENDPOINT + "/v1/users/{id}", id)
-                .retrieve()
-                .bodyToMono(Void.class);
+    public void deleteUser(int id) {
+        restTemplate.delete(USER_SERVICE_ENDPOINT + "/v1/users/{id}", id);
     }
 }

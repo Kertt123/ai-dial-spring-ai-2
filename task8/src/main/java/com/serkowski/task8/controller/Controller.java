@@ -5,7 +5,6 @@ import com.serkowski.task8.model.TextRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @RestController
 public class Controller {
@@ -17,7 +16,7 @@ public class Controller {
     }
 
     @PostMapping("/text")
-    Mono<String> text(@RequestBody Mono<TextRequest> requestBody) {
-        return requestBody.flatMap(request -> dialClient.chat(request.message(), request.conversationId()));
+    String text(@RequestBody TextRequest request) {
+        return dialClient.chat(request.message(), request.conversationId());
     }
 }
