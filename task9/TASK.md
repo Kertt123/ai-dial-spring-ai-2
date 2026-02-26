@@ -76,3 +76,5 @@ You need to implement the Users Management Agent, that will be able to perform C
 
 ---
 # <img src="dialx-banner.png">
+
+npx @modelcontextprotocol/inspector --sse http://localhost:8080/mcp/sse
