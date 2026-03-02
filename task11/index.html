@@ -720,6 +720,7 @@
              let lastContentTime = Date.now();
              let typingShown = false;
              let currentTypingIndicator = null;
+             let buffer = '';
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -746,49 +747,49 @@
             while (true) {
                 const {done, value} = await reader.read();
 
-                if (done) break;
+                if (done) {
+                    break;
+                }
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n');
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+
+                // Save the last line which might be incomplete
+                buffer = lines.pop() || '';
 
                 for (const line of lines) {
-                    if (line.startsWith('data:')) {
-                        const data = line.slice(5);
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine || !trimmedLine.startsWith('data:')) continue;
 
-                        try {
-                            const parsed = JSON.parse(data);
+                    const data = trimmedLine.slice(5).trim();
+                    if (data === '[DONE]') continue;
 
-                            if (parsed.content) {
-                                if (currentTypingIndicator) {
-                                    currentTypingIndicator.remove();
-                                    currentTypingIndicator = null;
-                                    typingShown = false;
-                                }
+                    try {
+                        const parsed = JSON.parse(data);
 
-                                if (!assistantMessage) {
-                                    typingIndicator.remove();
-                                    assistantMessage = addMessage('assistant', '');
-                                    messageBubble = assistantMessage.querySelector('.message-bubble');
-                                }
-
-                                const content = parsed.content;
-                                currentChunkContent += content;
-                                hasReceivedContent = true;
-                                lastContentTime = Date.now();
-
-                                messageBubble.innerHTML = marked.parse(currentChunkContent);
-                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        if (parsed.content) {
+                            if (currentTypingIndicator) {
+                                currentTypingIndicator.remove();
+                                currentTypingIndicator = null;
+                                typingShown = false;
                             }
 
-                            if (parsed.finished) {
-                                // Handle finish if needed, currently loop breaks on stream end
+                            if (!assistantMessage) {
+                                typingIndicator.remove();
+                                assistantMessage = addMessage('assistant', '');
+                                messageBubble = assistantMessage.querySelector('.message-bubble');
                             }
 
-                        } catch (e) {
-                            if (data !== '[DONE]') {
-                                console.error('Error parsing chunk:', e);
-                            }
+                            const content = parsed.content;
+                            currentChunkContent += content;
+                            hasReceivedContent = true;
+                            lastContentTime = Date.now();
+
+                            messageBubble.innerHTML = marked.parse(currentChunkContent);
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
                         }
+                    } catch (e) {
+                        console.error('Error parsing chunk:', e);
                     }
                 }
             }
