@@ -17,6 +17,7 @@ import org.springframework.ai.chat.client.advisor.StructuredOutputValidationAdvi
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.model.transformer.KeywordMetadataEnricher;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
@@ -72,6 +73,7 @@ public class Configuration {
                                         .vectorStore(vectorStore)
                                         .build())
                                 .queryTransformers(RewriteQueryTransformer.builder()
+                                        .promptTemplate(new PromptTemplate("Given a user query, rewrite it to provide better results when querying a {target}.\nRemove any irrelevant information, and ensure the query is concise and specific and translate to english if is in other language.\n\nOriginal query:\n{query}\n\nRewritten query:\n"))
                                         .chatClientBuilder(ChatClient.builder(AzureOpenAiChatModel.builder()
                                                 .openAIClientBuilder(openAIClientBuilder)
                                                 .defaultOptions(AzureOpenAiChatOptions.builder()
