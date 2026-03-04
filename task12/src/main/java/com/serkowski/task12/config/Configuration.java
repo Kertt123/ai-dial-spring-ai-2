@@ -13,8 +13,10 @@ import org.springframework.ai.azure.openai.AzureOpenAiChatOptions;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.StructuredOutputValidationAdvisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.model.transformer.KeywordMetadataEnricher;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
@@ -39,7 +41,11 @@ public class Configuration {
                                         .maxMessages(30)
                                         .build())
                                 .build(),
-                        new SimpleLoggerAdvisor()
+                        new SimpleLoggerAdvisor(),
+                        StructuredOutputValidationAdvisor.builder()
+                                .maxRepeatAttempts(3)
+                                .outputType(ChatResponse.class)
+                                .build()
                 )
                 .defaultOptions(AzureOpenAiChatOptions.builder()
                         .deploymentName("gpt-4o")
