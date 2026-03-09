@@ -1,7 +1,7 @@
 package com.serkowski.task14.generalPurpose.tools;
 
-import com.serkowski.generalPurpose.model.ChatResponse;
-import com.serkowski.generalPurpose.service.ImageGenerationService;
+import com.serkowski.task14.generalPurpose.model.ChatResponse;
+import com.serkowski.task14.generalPurpose.service.ImageGenerationService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 

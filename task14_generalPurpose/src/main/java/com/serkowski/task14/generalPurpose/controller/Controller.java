@@ -1,10 +1,10 @@
 package com.serkowski.task14.generalPurpose.controller;
 
-import com.serkowski.generalPurpose.clients.DialClient;
-import com.serkowski.generalPurpose.model.ChatResponse;
-import com.serkowski.generalPurpose.model.StoreRequest;
-import com.serkowski.generalPurpose.model.TextRequest;
-import com.serkowski.generalPurpose.service.VectorStoreService;
+import com.serkowski.task14.generalPurpose.clients.DialClient;
+import com.serkowski.task14.generalPurpose.model.ChatResponse;
+import com.serkowski.task14.generalPurpose.model.StoreRequest;
+import com.serkowski.task14.generalPurpose.model.TextRequest;
+import com.serkowski.task14.generalPurpose.service.VectorStoreService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

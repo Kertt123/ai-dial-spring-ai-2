@@ -1,11 +1,7 @@
 package com.serkowski.task14.config;
 
 import com.serkowski.task14.clients.DialClient;
-import com.serkowski.task14.repository.MemoryRepository;
-import com.serkowski.task14.service.MemoryService;
-import com.serkowski.task14.tools.FileExtractor;
-import com.serkowski.task14.tools.ImageGenerationTool;
-import com.serkowski.task14.tools.RagTool;
+import com.serkowski.task14.model.ChatResponse;
 import org.springframework.ai.azure.openai.AzureOpenAiChatOptions;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -14,21 +10,18 @@ import org.springframework.ai.chat.client.advisor.StructuredOutputValidationAdvi
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import static com.serkowski.task14.config.Prompts.SYSTEM_PROMPT;
 
 @org.springframework.context.annotation.Configuration
 public class Configuration {
-
-    @Bean
-    public MemoryService memoryService(MemoryRepository memoryRepository) {
-        return new MemoryService(memoryRepository);
-    }
 
     @Bean
     public ChatMemory chatMemory() {
@@ -41,10 +34,7 @@ public class Configuration {
     @Bean
     public DialClient dialClient(ChatModel chatModel,
                                  ChatMemory chatMemory,
-                                 ImageGenerationTool imageGenerationTool,
-                                 SyncMcpToolCallbackProvider toolCallbackProvider,
-                                 RagTool ragTool,
-                                 MemoryService memoryService) {
+                                 SyncMcpToolCallbackProvider toolCallbackProvider) {
         return new DialClient(ChatClient.builder(chatModel)
                 .defaultAdvisors(
                         MessageChatMemoryAdvisor.builder(chatMemory)
@@ -58,10 +48,11 @@ public class Configuration {
                 .defaultOptions(AzureOpenAiChatOptions.builder()
                         .deploymentName("gpt-4o")
                         .build())
-                .defaultTools(imageGenerationTool, new FileExtractor(), ragTool)
-                .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                .defaultToolCallbacks(Arrays.stream(toolCallbackProvider.getToolCallbacks())
+                        .filter(tool -> tool.getToolDefinition().name().contains("agent"))
+                        .toList())
                 .defaultSystem(SYSTEM_PROMPT)
-                .build(), memoryService);
+                .build());
     }
 
     @Bean

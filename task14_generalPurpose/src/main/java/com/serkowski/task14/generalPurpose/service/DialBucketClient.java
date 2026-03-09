@@ -1,8 +1,8 @@
 package com.serkowski.task14.generalPurpose.service;
 
-import com.serkowski.generalPurpose.model.bucket.BucketResponse;
-import com.serkowski.generalPurpose.model.bucket.BucketUploadResponse;
-import com.serkowski.generalPurpose.model.bucket.DialAttachement;
+import com.serkowski.task14.generalPurpose.model.bucket.BucketResponse;
+import com.serkowski.task14.generalPurpose.model.bucket.BucketUploadResponse;
+import com.serkowski.task14.generalPurpose.model.bucket.DialAttachement;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

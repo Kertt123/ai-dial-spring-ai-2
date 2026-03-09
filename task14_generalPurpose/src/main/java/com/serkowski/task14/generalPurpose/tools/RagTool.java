@@ -1,6 +1,6 @@
 package com.serkowski.task14.generalPurpose.tools;
 
-import com.serkowski.generalPurpose.service.VectorStoreService;
+import com.serkowski.task14.generalPurpose.service.VectorStoreService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;

@@ -1,7 +1,7 @@
 package com.serkowski.task14.generalPurpose.model.dial;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.serkowski.generalPurpose.model.bucket.CustomContent;
+import com.serkowski.task14.generalPurpose.model.bucket.CustomContent;
 
 import java.io.Serializable;
 @JsonInclude(JsonInclude.Include.NON_NULL)

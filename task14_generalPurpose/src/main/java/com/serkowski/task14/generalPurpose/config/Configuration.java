@@ -1,13 +1,17 @@
 package com.serkowski.task14.generalPurpose.config;
 
 import com.azure.ai.openai.OpenAIClientBuilder;
-import com.serkowski.generalPurpose.clients.DialClient;
-import com.serkowski.generalPurpose.service.DialBucketClient;
-import com.serkowski.generalPurpose.service.ImageGenerationService;
-import com.serkowski.generalPurpose.service.VectorStoreService;
-import com.serkowski.generalPurpose.tools.FileExtractor;
-import com.serkowski.generalPurpose.tools.ImageGenerationTool;
-import com.serkowski.generalPurpose.tools.RagTool;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.serkowski.task14.generalPurpose.clients.DialClient;
+import com.serkowski.task14.generalPurpose.service.DialBucketClient;
+import com.serkowski.task14.generalPurpose.service.ImageGenerationService;
+import com.serkowski.task14.generalPurpose.service.VectorStoreService;
+import com.serkowski.task14.generalPurpose.tools.FileExtractor;
+import com.serkowski.task14.generalPurpose.tools.ImageGenerationTool;
+import com.serkowski.task14.generalPurpose.tools.RagTool;
+import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.ai.azure.openai.AzureOpenAiChatModel;
 import org.springframework.ai.azure.openai.AzureOpenAiChatOptions;
 import org.springframework.ai.chat.client.ChatClient;
@@ -23,15 +27,15 @@ import org.springframework.ai.model.transformer.KeywordMetadataEnricher;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
-import org.springframework.ai.support.ToolCallbacks;
-import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
+import java.util.Map;
 
 @org.springframework.context.annotation.Configuration
 public class Configuration {
@@ -143,9 +147,39 @@ public class Configuration {
     }
 
     @Bean
-    public ToolCallbackProvider myTools(DialClient dialClient) {
-        ToolCallback[] tools = ToolCallbacks.from(dialClient);
-        return ToolCallbackProvider.from(tools);
+    public List<McpServerFeatures.SyncToolSpecification> myTools(DialClient dialClient) {
+        var inputSchema = new McpSchema.JsonSchema(
+                "object",
+                Map.of(
+                        "prompt", Map.of("type", "string", "description", "Description of a task provided from orchestrator."),
+                        "conversationId", Map.of("type", "string", "description", "Conversation history id.")
+                ),
+                List.of("prompt", "conversationId"),
+                null,
+                null,
+                null
+        );
+
+        var tool = McpSchema.Tool.builder()
+                .name("general-purpose-agent")
+                .description("General purpose chat tool that can be used to perform various tasks by providing a prompt and conversation history id to maintain context. Can extract file content, do web search and do python code")
+                .inputSchema(inputSchema)
+                .build();
+
+        var objectMapper = new ObjectMapper();
+        var registration = new McpServerFeatures.SyncToolSpecification(tool, (exchange, args) -> {
+            String prompt = (String) args.get("prompt");
+            String conversationId = (String) args.get("conversationId");
+            com.serkowski.task14.generalPurpose.model.ChatResponse result = dialClient.chat(prompt, conversationId);
+            try {
+                String json = objectMapper.writeValueAsString(result);
+                return new McpSchema.CallToolResult(List.of(new McpSchema.TextContent(json)), false);
+            } catch (JsonProcessingException e) {
+                return new McpSchema.CallToolResult(List.of(new McpSchema.TextContent("Error serializing response: " + e.getMessage())), true);
+            }
+        });
+
+        return List.of(registration);
     }
 
 }

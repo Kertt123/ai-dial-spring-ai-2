@@ -1,11 +1,11 @@
 package com.serkowski.task14.generalPurpose.service;
 
-import com.serkowski.generalPurpose.model.bucket.DialAttachement;
-import com.serkowski.generalPurpose.model.dial.Configuration;
-import com.serkowski.generalPurpose.model.dial.CustomField;
-import com.serkowski.generalPurpose.model.dial.Request;
-import com.serkowski.generalPurpose.model.dial.RequestMessage;
-import com.serkowski.generalPurpose.model.dial.Response;
+import com.serkowski.task14.generalPurpose.model.bucket.DialAttachement;
+import com.serkowski.task14.generalPurpose.model.dial.Configuration;
+import com.serkowski.task14.generalPurpose.model.dial.CustomField;
+import com.serkowski.task14.generalPurpose.model.dial.Request;
+import com.serkowski.task14.generalPurpose.model.dial.RequestMessage;
+import com.serkowski.task14.generalPurpose.model.dial.Response;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
