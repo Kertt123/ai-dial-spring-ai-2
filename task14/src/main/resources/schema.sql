@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS user_memory (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) UNIQUE NOT NULL,
+    memory TEXT
+);
+
