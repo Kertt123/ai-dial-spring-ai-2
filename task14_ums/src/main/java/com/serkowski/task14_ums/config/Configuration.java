@@ -1,5 +1,8 @@
 package com.serkowski.task14_ums.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.serkowski.task14_ums.model.ChatResponse;
 import com.serkowski.task14_ums.service.UserChatClient;
 import com.serkowski.task14_ums.service.UserService;
 import com.serkowski.task14_ums.service.UserTools;
@@ -13,6 +16,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -56,7 +60,7 @@ public class Configuration {
     }
 
     @Bean
-    public List<McpServerFeatures.SyncToolSpecification> myTools(UserChatClient agentClient) {
+    public List<McpServerFeatures.SyncToolSpecification> myTools(@Lazy UserChatClient agentClient) {
         var inputSchema = new McpSchema.JsonSchema(
                 "object",
                 Map.of(
@@ -75,11 +79,17 @@ public class Configuration {
                 .inputSchema(inputSchema)
                 .build();
 
+        var objectMapper = new ObjectMapper();
         var registration = new McpServerFeatures.SyncToolSpecification(tool, (exchange, args) -> {
             String prompt = (String) args.get("prompt");
             String conversationId = (String) args.get("conversationId");
-            String result = agentClient.chat(prompt, conversationId);
-            return new McpSchema.CallToolResult(List.of(new McpSchema.TextContent(result)), false);
+            ChatResponse result = agentClient.chat(prompt, conversationId);
+            try {
+                String json = objectMapper.writeValueAsString(result);
+                return new McpSchema.CallToolResult(List.of(new McpSchema.TextContent(json)), false);
+            } catch (JsonProcessingException e) {
+                return new McpSchema.CallToolResult(List.of(new McpSchema.TextContent("Error serializing response: " + e.getMessage())), true);
+            }
         });
 
         return List.of(registration);
